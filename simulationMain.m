@@ -1,4 +1,4 @@
-close all
+%close all
 clear all
 %% generate default image
 xPix = 512; % dimension of image in x
@@ -15,58 +15,38 @@ N = 6; % number of subunits (labelled)
 lambda = 488; % wavelength [nm]
 NA = 1.4; % numerical aperture
 I0 = 100; % laser intensity at max of Gauss
-doN = 360; % how many points for donut circle movement
+doN = 12; % how many points for donut circle movement
+w0 = lambda/(pi*NA)/pixS; % Gauss width
+thDo = 0.50; % prozent of saturation for superRes
 
-%% generate protein structure
-protImg = zeros(xPix, yPix); 
-% angles for N points
-angles = linspace(0, 2*pi, N+1);
-angles(end) = []; % remove last point (= first point)
-% set points on circle
-for i = 1:N
-    x = round(centerX + r/pixS * cos(angles(i)));
-    y = round(centerY + r/pixS * sin(angles(i)));
-    if x > 0 && x <= xPix && y > 0 && y <= yPix
-        protImg(y, x) = 1;
-    end
-end
+%% generate images 
+% protein structure
+protImg = genProtImg(xPix, yPix, pixS, r, N);
 
-
-%% generate donuts with different positions
-[X, Y] = meshgrid(1:xPix, 1:yPix); % meshgrid
-w0 = lambda/(pi*NA)/pixS; % Gauss
-doR = r/pixS;
-doAngles = linspace(0, 2*pi, doN+1);
-doAngles(end) = []; % remove last point (= first point)
-resDo = zeros(xPix, yPix, doN);
-for i = 1:doN
-    doX = round(centerX + doR * cos(doAngles(i)));
-    doY = round(centerY + doR * sin(doAngles(i)));
-    doRR = sqrt((X-doX).^2 + (Y-doY).^2);  
-    resDo(:,:,i) = I0 * (doRR.^2 / w0^2) .* exp(-2 * doRR.^2 / w0^2);
-end
+%generate donuts with different positions
+resDo = genDonImgs(xPix, yPix, w0, 50, pixS, doN, I0);
 
 %% calc resulting intensity profiles
 resProt = protImg.*resDo; 
 resSumInt = squeeze(sum(resProt,[1 2]));
+resMod = (max(resSumInt)-min(resSumInt))/(max(resSumInt)+min(resSumInt));
+
 resDoSat = resDo;
 maxDo = max(resDo, [], 'all');
-thDo = 0.50; % prozent of saturation
 resDoSat(resDoSat>thDo*maxDo) = thDo*maxDo;
 resProtSat = protImg.*resDoSat;
 resSumIntSat = squeeze(sum(resProtSat,[1 2]));
-%resProtBlurr = imfilter(resProt, fspecial('gaussian', [50 50], 10), 'replicate');
+resModSat = (max(resSumIntSat)-min(resSumIntSat))/(max(resSumIntSat)+min(resSumIntSat));
 %% plot stuff
-close all
-figure
-plot(resSumInt)
+% figure
+% plot(resSumInt)
 figure
 plot(resSumIntSat)
-figure
-sliceViewer(resDoSat, 'DisplayRange', [min(resDoSat,[],'all') max(resDoSat,[],'all')], 'SliceNumber',1)
-figure
-sliceViewer(resProtSat, 'DisplayRange', [min(resProtSat,[],'all') max(resProtSat,[],'all')], 'SliceNumber',1)
 % figure
+% sliceViewer(resDoSat, 'DisplayRange', [min(resDoSat,[],'all') max(resDoSat,[],'all')], 'SliceNumber',1)
+% figure
+% sliceViewer(resProtSat, 'DisplayRange', [min(resProtSat,[],'all') max(resProtSat,[],'all')], 'SliceNumber',1)
+% % figure
 % montage(resProt, 'DisplayRange',[])
 % figure
 % montage(resProtSat, 'DisplayRange',[])
@@ -74,3 +54,16 @@ sliceViewer(resProtSat, 'DisplayRange', [min(resProtSat,[],'all') max(resProtSat
 % montage(resDo, 'DisplayRange',[])
 % figure
 % montage(resDoSat, 'DisplayRange',[])
+%% plot
+% figure
+% for j = 1:max(size(doRR))
+%     %Legend{j} = doRR(j)
+%     plot(loopSumIntSat(j,:),'DisplayName',sprintf('%.0f',doRR(j))); hold on
+% end
+% title('superResolved')
+% legend
+% figure
+% for j = 1:max(size(doRR))
+%     plot(loopSumInt(j,:), 'DisplayName',sprintf('%.0f',doRR(j))); hold on
+% end
+% title('dif limited')
