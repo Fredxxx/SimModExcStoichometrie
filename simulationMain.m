@@ -1,9 +1,9 @@
 close all
 clear all
 %% generate default image
-xPix = 2048; % dimension of image in x
-yPix = 2048; % dimension of image in y
-pixS = 0.025; % pixel size in nm
+xPix = 512; % dimension of image in x
+yPix = 512; % dimension of image in y
+pixS = 0.1; % pixel size in nm
 centerX = xPix / 2;
 centerY = yPix / 2;
 
@@ -15,6 +15,7 @@ N = 6; % number of subunits (labelled)
 lambda = 488; % wavelength [nm]
 NA = 1.4; % numerical aperture
 I0 = 100; % laser intensity at max of Gauss
+doN = 360; % how many points for donut circle movement
 
 %% generate protein structure
 protImg = zeros(xPix, yPix); 
@@ -35,7 +36,6 @@ end
 [X, Y] = meshgrid(1:xPix, 1:yPix); % meshgrid
 w0 = lambda/(pi*NA)/pixS; % Gauss
 doR = r/pixS;
-doN = 12; % how many points for donut circle movement
 doAngles = linspace(0, 2*pi, doN+1);
 doAngles(end) = []; % remove last point (= first point)
 resDo = zeros(xPix, yPix, doN);
@@ -63,10 +63,14 @@ plot(resSumInt)
 figure
 plot(resSumIntSat)
 figure
-montage(resProt, 'DisplayRange',[])
+sliceViewer(resDoSat, 'DisplayRange', [min(resDoSat,[],'all') max(resDoSat,[],'all')], 'SliceNumber',1)
 figure
-montage(resProtSat, 'DisplayRange',[])
-figure
-montage(resDo, 'DisplayRange',[])
-figure
-montage(resDoSat, 'DisplayRange',[])
+sliceViewer(resProtSat, 'DisplayRange', [min(resProtSat,[],'all') max(resProtSat,[],'all')], 'SliceNumber',1)
+% figure
+% montage(resProt, 'DisplayRange',[])
+% figure
+% montage(resProtSat, 'DisplayRange',[])
+% figure
+% montage(resDo, 'DisplayRange',[])
+% figure
+% montage(resDoSat, 'DisplayRange',[])
