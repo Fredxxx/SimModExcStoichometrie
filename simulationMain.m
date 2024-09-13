@@ -17,19 +17,19 @@ NA = 1.4; % numerical aperture
 I0 = 100; % laser intensity at max of Gauss
 doN = 36; % how many points for donut circle movement
 w0 = lambda/(pi*NA)/pixS; % Gauss width
-thDo = 0.05; % prozent of saturation for superRes
+thDo = 0.5; % prozent of saturation for superRes
 
 %% generate images 
 % protein structure
 protImg = genProtImg(xPix, yPix, pixS, r, N);
 
-minR = 5;
-maxR = 50;
-nR = 46;
+minR = 0;
+maxR = 15;
+nR = 16;
 R = linspace(minR,maxR,nR);
 
-for j = 1:nR % j = 1
-    %R(j) = 20;
+for j = 1 %j = 1:nR % j = 1
+    R(j) = 20;
     %generate donuts with different positions
     resDo = genDonImgs(xPix, yPix, w0, R(j), pixS, doN, I0);
     
@@ -49,17 +49,17 @@ for j = 1:nR % j = 1
 end
 
 %% plot stuff
-% figure
-% plot(resSumInt)
-% figure
-% plot(resSumIntSat)
-% figure
-% sliceViewer(resDoSat, 'DisplayRange', [min(resDoSat,[],'all') max(resDoSat,[],'all')], 'SliceNumber',1)
-% figure
-% sliceViewer(resProtSat, 'DisplayRange', [min(resProtSat,[],'all') max(resProtSat,[],'all')], 'SliceNumber',1)
-%% plot rdependency
 figure
-plot(R,resModSat,R,resMod)
+plot(resSumInt)
+figure
+plot(resSumIntSat)
+figure
+sliceViewer(resDoSat, 'DisplayRange', [min(resDoSat,[],'all') max(resDoSat,[],'all')], 'SliceNumber',1)
+figure
+sliceViewer(resProtSat, 'DisplayRange', [min(resProtSat,[],'all') max(resProtSat,[],'all')], 'SliceNumber',1)
+%% plot rdependency
+% figure
+% plot(R,resModSat,R,resMod)
 
 %% plot all traces of summed intensities r-dependency
 % figure
